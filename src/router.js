@@ -15,6 +15,7 @@ router.put('/update/winner/score', sessionsControllers.putWinnerInstances);
 router.post('/get/saved/draw', sessionsControllers.getSavedDraw);
 router.post('/guess/attempt', sessionsControllers.checkGuess);
 router.post('/session/data', sessionsControllers.getSessionData);
+router.put('/switch/player/turn', sessionsControllers.switchPlayersTurn);
 router.get('/status', healthCheck);
 
 module.exports = router;

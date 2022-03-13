@@ -1,7 +1,7 @@
 BEGIN;
 
 DROP TABLE IF EXISTS players, sessions CASCADE;
-DROP TYPE IF EXISTS session_status CASCADE;
+DROP TYPE IF EXISTS session_status,player_type CASCADE;
 
 CREATE TYPE session_status AS ENUM ('pending','ready','live','expired');
 
@@ -17,8 +17,9 @@ CREATE TABLE sessions (
   status session_status DEFAULT 'pending' NOT NULL,
   host_player_id INTEGER REFERENCES players(id) NOT NULL,
   guest_player_id INTEGER REFERENCES players(id),
+  host_turn BOOLEAN DEFAULT TRUE NOT NULL,
   correct_word VARCHAR(25),
-  draw_data text DEFAULT NULL,
+  draw_data text,
   winner_score INTEGER,
   winner_name VARCHAR(25),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL

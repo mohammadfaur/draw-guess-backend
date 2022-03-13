@@ -90,7 +90,8 @@ const getChosenWord = (sessionId) =>
 const fetchSessionInfo = (sessionId) =>
   db
     .query(
-      `SELECT sessions.id as session_id, status, host_player_id, guest_player_id,
+      `SELECT sessions.id as session_id, status, host_player_id,
+         guest_player_id, host_turn,
          host.name as host_name, host.score as host_score,
          guest.name as guest_name, guest.score as guest_score 
          FROM sessions 
@@ -104,6 +105,7 @@ const fetchSessionInfo = (sessionId) =>
       return {
         sessionId: data.session_id,
         status: data.status,
+        hostTurn: data.host_turn,
         hostId: data.host_player_id,
         guestId: data.guest_player_id,
         hostName: data.host_name,
@@ -112,6 +114,13 @@ const fetchSessionInfo = (sessionId) =>
         guestScore: data.guest_score,
       };
     });
+
+//update player's turn.
+const updatePlayerTurn = (sessionId, state) =>
+  db.query(`UPDATE sessions SET host_turn = ($1) WHERE sessions.id = ($2)`, [
+    state,
+    sessionId,
+  ]);
 
 const getSessionStatus = (sessionId) => {
   return db
@@ -130,4 +139,5 @@ module.exports = {
   getChosenWord,
   fetchSessionInfo,
   getSessionStatus,
+  updatePlayerTurn,
 };

@@ -123,6 +123,20 @@ const getSessionData = (req, res) => {
     });
 };
 
+//set player turn
+const switchPlayersTurn = (req, res) => {
+  const { hostTurn, sessionId } = req.body;
+  sessionsModels
+    .updatePlayerTurn(sessionId, hostTurn)
+    .then(() => {
+      res.status(200).send('success');
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Internal server error.');
+    });
+};
+
 module.exports = {
   createNewSession,
   checkStatus,
@@ -132,4 +146,5 @@ module.exports = {
   getSavedDraw,
   checkGuess,
   getSessionData,
+  switchPlayersTurn,
 };
