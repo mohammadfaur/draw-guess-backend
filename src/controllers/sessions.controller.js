@@ -7,31 +7,8 @@ const createNewSession = (req, res) => {
   playersModels
     .setPlayerName(playerName)
     .then((playerId) => sessionsModels.setNewSession(playerId))
-    .then((sessionId) => res.status(200).send({ sessionId: sessionId }))
+    .then((result) => res.status(200).send(result))
     .catch((error) => res.status(500).send(error.message)); //internal server error
-};
-
-//report session status and guest player id(if exist)
-const checkStatus = (req, res) => {
-  const sessionId = req.params.sessionId;
-  sessionsModels
-    .getSessionInfo(sessionId)
-    .then((sessionInfo) => {
-      //check if session exist.
-      if (!sessionInfo) {
-        res.status(404).send('Page not found');
-        return;
-      }
-      res.status(200).send({
-        status: sessionInfo.status,
-        hostName: sessionInfo.host_name,
-        hostId: sessionInfo.id,
-      });
-    })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).send(error);
-    });
 };
 
 //update chosen word in spesific session, by sessionID
@@ -137,9 +114,22 @@ const switchPlayersTurn = (req, res) => {
     });
 };
 
+//update session status
+const updateSessionStatus = (req, res) => {
+  const { status, sessionId } = req.body;
+  sessionsModels
+    .fetchSessionStatus(sessionId, status)
+    .then(() => {
+      res.status(200).send('success');
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Internal server error.');
+    });
+};
+
 module.exports = {
   createNewSession,
-  checkStatus,
   putCorrectWord,
   putDrawings,
   putWinnerInstances,
@@ -147,4 +137,5 @@ module.exports = {
   checkGuess,
   getSessionData,
   switchPlayersTurn,
+  updateSessionStatus,
 };

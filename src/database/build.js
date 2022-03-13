@@ -12,4 +12,4 @@ db.query(initSQL)
     console.log('Database built');
     db.end(); // close the connection as we're finished
   })
-  .catch(console.log);
+  .catch(console.error);

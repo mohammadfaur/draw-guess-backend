@@ -1,9 +1,9 @@
 BEGIN;
 
 DROP TABLE IF EXISTS players, sessions CASCADE;
-DROP TYPE IF EXISTS session_status,player_type CASCADE;
+DROP TYPE IF EXISTS session_status CASCADE;
 
-CREATE TYPE session_status AS ENUM ('pending','ready','live','expired');
+CREATE TYPE session_status AS ENUM ('pending','live','expired');
 
 CREATE TABLE players (
   id SERIAL PRIMARY KEY,

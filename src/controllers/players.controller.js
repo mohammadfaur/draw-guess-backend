@@ -7,7 +7,7 @@ const putGuestName = (req, res) => {
   playerModels
     .setPlayerName(playerName)
     .then((guestId) => sessionModels.updateGuestId(sessionId, guestId))
-    .then(() => res.status(200).send('success'))
+    .then((guestId) => res.status(200).send(guestId))
     .catch((error) => res.status(500).send(error.message));
 };
 

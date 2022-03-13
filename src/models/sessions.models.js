@@ -3,28 +3,27 @@ const db = require('../database/connection');
 //create new game session.
 const setNewSession = (playerId) =>
   db
-    .query(`INSERT INTO sessions (host_player_id) VALUES($1) RETURNING id`, [
-      playerId,
-    ])
-    .then(({ rows }) => rows[0].id);
-
-//get the the host name,hostID, session status according to the session ID.
-const getSessionInfo = (sessionId) =>
-  db
     .query(
-      `SELECT players.id, name as host_name, status 
-      FROM sessions 
-      JOIN players ON players.id = sessions.host_player_id 
-      WHERE sessions.id = ${sessionId}`
+      `INSERT INTO sessions (host_player_id) VALUES($1) RETURNING id, host_player_id`,
+      [playerId]
     )
-    .then(({ rows }) => rows[0]);
+    .then(({ rows }) => {
+      return {
+        sessionId: rows[0].id,
+        playerId: rows[0].host_player_id,
+      };
+    });
 
 //update guestID in a session according to it id.
 const updateGuestId = (sessionId, guestId) =>
-  db.query(
-    `UPDATE sessions SET guest_player_id = ($1) WHERE sessions.id = ($2)`,
-    [guestId, sessionId]
-  );
+  db
+    .query(
+      `UPDATE sessions SET guest_player_id = ($1) WHERE sessions.id = ($2) RETURNING guest_player_id`,
+      [guestId, sessionId]
+    )
+    .then(({ rows }) => {
+      return { guestId: rows[0].guest_player_id };
+    });
 
 //update the chosen word in a session by sessionID
 const updateChosenWord = (sessionId, pickedWord) =>
@@ -91,7 +90,7 @@ const fetchSessionInfo = (sessionId) =>
   db
     .query(
       `SELECT sessions.id as session_id, status, host_player_id,
-         guest_player_id, host_turn,
+         guest_player_id, host_turn, draw_data,
          host.name as host_name, host.score as host_score,
          guest.name as guest_name, guest.score as guest_score 
          FROM sessions 
@@ -105,6 +104,7 @@ const fetchSessionInfo = (sessionId) =>
       return {
         sessionId: data.session_id,
         status: data.status,
+        drawData: data.draw_data,
         hostTurn: data.host_turn,
         hostId: data.host_player_id,
         guestId: data.guest_player_id,
@@ -122,15 +122,15 @@ const updatePlayerTurn = (sessionId, state) =>
     sessionId,
   ]);
 
-const getSessionStatus = (sessionId) => {
-  return db
-    .query(`SELECT status, guest_player_id FROM sessions WHERE id=${sessionId}`)
-    .then(({ rows }) => rows[0]);
-};
+//update session status.
+const fetchSessionStatus = (sessionId, sessionStatus) =>
+  db.query(`UPDATE sessions SET status = ($1) WHERE sessions.id = ($2)`, [
+    sessionStatus,
+    sessionId,
+  ]);
 
 module.exports = {
   setNewSession,
-  getSessionInfo,
   updateGuestId,
   updateChosenWord,
   updateDraw,
@@ -138,6 +138,6 @@ module.exports = {
   fetchSavedDraw,
   getChosenWord,
   fetchSessionInfo,
-  getSessionStatus,
   updatePlayerTurn,
+  fetchSessionStatus,
 };
