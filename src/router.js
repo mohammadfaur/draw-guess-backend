@@ -1,6 +1,7 @@
 const express = require('express');
 const sessionsControllers = require('./controllers/sessions.controller');
 const playersControllers = require('./controllers/players.controller');
+const healthCheck = require('./services/healthCheck.service');
 
 const router = express.Router();
 
@@ -14,14 +15,6 @@ router.put('/update/winner/score', sessionsControllers.putWinnerInstances);
 router.post('/get/saved/draw', sessionsControllers.getSavedDraw);
 router.post('/guess/attempt', sessionsControllers.checkGuess);
 router.post('/session/data', sessionsControllers.getSessionData);
-
-router.get('/health', (req, res) => {
-  const status = {
-    uptime: process.uptime(),
-    date: new Date(),
-    message: 'Ok',
-  };
-  res.status(200).send(status);
-});
+router.get('/status', healthCheck);
 
 module.exports = router;
