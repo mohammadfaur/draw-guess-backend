@@ -86,6 +86,33 @@ const getChosenWord = (sessionId) =>
     ])
     .then(({ rows }) => rows[0].correct_word);
 
+//get all session data.
+const fetchSessionInfo = (sessionId) =>
+  db
+    .query(
+      `SELECT sessions.id as session_id, status, host_player_id, guest_player_id,
+         host.name as host_name, host.score as host_score,
+         guest.name as guest_name, guest.score as guest_score 
+         FROM sessions 
+         JOIN players as host ON host.id = sessions.host_player_id 
+         LEFT JOIN players as guest ON guest.id = sessions.guest_player_id 
+         WHERE sessions.id = ($1)`,
+      [sessionId]
+    )
+    .then(({ rows }) => rows[0])
+    .then((data) => {
+      return {
+        sessionId: data.session_id,
+        status: data.status,
+        hostId: data.host_player_id,
+        guestId: data.guest_player_id,
+        hostName: data.host_name,
+        hostScore: data.host_score,
+        guestName: data.guest_name,
+        guestScore: data.guest_score,
+      };
+    });
+
 const getSessionStatus = (sessionId) => {
   return db
     .query(`SELECT status, guest_player_id FROM sessions WHERE id=${sessionId}`)
@@ -101,5 +128,6 @@ module.exports = {
   updateWinnerInstances,
   fetchSavedDraw,
   getChosenWord,
+  fetchSessionInfo,
   getSessionStatus,
 };

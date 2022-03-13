@@ -13,6 +13,7 @@ router.put('/update/player/score', playersControllers.putPlayerScore);
 router.put('/update/winner/score', sessionsControllers.putWinnerInstances);
 router.post('/get/saved/draw', sessionsControllers.getSavedDraw);
 router.post('/guess/attempt', sessionsControllers.checkGuess);
+router.post('/session/data', sessionsControllers.getSessionData);
 
 router.get('/health', (req, res) => {
   const status = {

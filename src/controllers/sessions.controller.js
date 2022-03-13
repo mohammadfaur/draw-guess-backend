@@ -108,6 +108,21 @@ const checkGuess = (req, res) => {
       res.status(500).send('Internal server error.');
     });
 };
+
+//get session info
+const getSessionData = (req, res) => {
+  const { sessionId } = req.body;
+  sessionsModels
+    .fetchSessionInfo(sessionId)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Internal server error.');
+    });
+};
+
 module.exports = {
   createNewSession,
   checkStatus,
@@ -116,4 +131,5 @@ module.exports = {
   putWinnerInstances,
   getSavedDraw,
   checkGuess,
+  getSessionData,
 };
