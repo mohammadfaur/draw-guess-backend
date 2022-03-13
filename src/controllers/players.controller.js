@@ -6,11 +6,8 @@ const putGuestName = (req, res) => {
   const { playerName, sessionId } = req.body;
   playerModels
     .setPlayerName(playerName)
-    .then((guestId) => {
-      sessionModels.updateGuestId(guestId, sessionId);
-      return guestId;
-    })
-    .then((guestId) => res.status(200).send(guestId))
+    .then((guestId) => sessionModels.updateGuestId(sessionId, guestId))
+    .then(() => res.status(200).send('success'))
     .catch((error) => res.status(500).send(error.message));
 };
 
