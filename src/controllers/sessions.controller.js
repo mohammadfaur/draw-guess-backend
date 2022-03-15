@@ -69,13 +69,42 @@ const getSavedDraw = (req, res) => {
 
 //check a guessing attempt.
 const checkGuess = (req, res) => {
-  const { sessionId, guessedWord } = req.body;
+  const { sessionId, playerId, hostTurn, guessedWord } = req.body;
   sessionsModels
     .getChosenWord(sessionId)
     .then((correctWord) => {
       //the check ignores case sensitivity.
       if (correctWord.toLowerCase() === guessedWord.toLowerCase()) {
-        res.status(200).send(true);
+        /*
+            if the word is correct then:
+              - get previous score.
+              - update score.
+              - switch players turns.
+              - reset drew image.
+              - response with ture value
+        */
+        playersModels
+          .getPlayerScore(playerId)
+          .then((prevScore) => {
+            let score = 0;
+            ((fetchedWord) => {
+              const length = fetchedWord.length;
+              if (length < 4) {
+                score = 1;
+              } else if (length >= 4 && length < 7) {
+                score = 3;
+              } else {
+                score = 5;
+              }
+            })(guessedWord);
+            return prevScore + score;
+          })
+          .then((score) => playersModels.updatePlayerScore(playerId, score))
+          .then(() => sessionsModels.updatePlayerTurn(sessionId, hostTurn))
+          .then(() => sessionsModels.updateDraw(sessionId, null))
+          .then(() => {
+            res.status(200).send(true);
+          });
       } else {
         res.status(200).send(false);
       }
@@ -100,12 +129,15 @@ const getSessionData = (req, res) => {
     });
 };
 
-//set player turn
-const switchPlayersTurn = (req, res) => {
-  const { hostTurn, sessionId } = req.body;
+//update session status
+const updateSessionStatus = (req, res) => {
+  const { status, sessionId } = req.body;
   sessionsModels
-    .updatePlayerTurn(sessionId, hostTurn)
+    .fetchSessionStatus(sessionId, status)
     .then(() => {
+      if (status === 'expired') {
+        sessionsModels.updateWinnerInstances(sessionId);
+      }
       res.status(200).send('success');
     })
     .catch((error) => {
@@ -114,13 +146,12 @@ const switchPlayersTurn = (req, res) => {
     });
 };
 
-//update session status
-const updateSessionStatus = (req, res) => {
-  const { status, sessionId } = req.body;
+//get top ten scores in all games.
+const getTopTenPlayersScore = (req, res) => {
   sessionsModels
-    .fetchSessionStatus(sessionId, status)
-    .then(() => {
-      res.status(200).send('success');
+    .fetchTopTenScores()
+    .then((data) => {
+      res.status(200).send(data);
     })
     .catch((error) => {
       console.error(error);
@@ -136,6 +167,6 @@ module.exports = {
   getSavedDraw,
   checkGuess,
   getSessionData,
-  switchPlayersTurn,
+  getTopTenPlayersScore,
   updateSessionStatus,
 };

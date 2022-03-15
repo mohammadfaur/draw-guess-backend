@@ -129,6 +129,18 @@ const fetchSessionStatus = (sessionId, sessionStatus) =>
     sessionId,
   ]);
 
+//get top 10 score.
+const fetchTopTenScores = () =>
+  db
+    .query(
+      `SELECT winner_name, winner_score 
+    FROM sessions 
+    WHERE winner_score > 0 
+    ORDER BY winner_score DESC 
+    LIMIT 10`
+    )
+    .then(({ rows }) => rows);
+
 module.exports = {
   setNewSession,
   updateGuestId,
@@ -140,4 +152,5 @@ module.exports = {
   fetchSessionInfo,
   updatePlayerTurn,
   fetchSessionStatus,
+  fetchTopTenScores,
 };
